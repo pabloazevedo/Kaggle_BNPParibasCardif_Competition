@@ -130,12 +130,13 @@ xgtest = xgb.DMatrix(as.matrix(test))
 docv <- function(param0, iter) {
   model_cv = xgb.cv(
     params = param0
-    , nrounds = iter
-    , nfold = 5
+    , nrounds = 8
+    , max.deph = 16
+    , nfold = 10
     , data = xgtrain
     , early.stop.round = 5
     , maximize = FALSE
-    , nthread = 8
+    , nthread = 16
   )
   gc()
   best <- min(model_cv$test.logloss.mean)
@@ -150,12 +151,13 @@ docv <- function(param0, iter) {
 doTest <- function(param0, iter) {
   watchlist <- list('train' = xgtrain)
   model = xgb.train(
-    nrounds = iter
+    nrounds = 8
     , params = param0
+    , max.deph = 16
     , data = xgtrain
     , watchlist = watchlist
     , print.every.n = 20
-    , nthread = 8
+    , nthread = 16
   )
   p <- predict(model, xgtest)
   rm(model)
@@ -186,7 +188,7 @@ print( difftime( Sys.time(), start_time, units = 'sec'))
 submission <- read.csv("sample_submission.csv")
 ensemble <- rep(0, nrow(test))
 
-cv <- round(cv * 1.4)
+cv <- round(cv * 1.5)
 cat("Calculated rounds:", cv, " Starting ensemble\n")
 
 # Bagging of single xgboost for ensembling
@@ -205,7 +207,7 @@ cat("Making predictions\n")
 submission$PredictedProb <- ensemble/i
 
 # Prepare submission
-write.csv(submission, "bnp-xgb-ks2.csv", row.names=F, quote=F)
+write.csv(submission, "bnp-xgb-ks3.csv", row.names=F, quote=F)
 summary(submission$PredictedProb)
 
 # Stop the clock
