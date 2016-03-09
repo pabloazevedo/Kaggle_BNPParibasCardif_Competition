@@ -131,12 +131,12 @@ docv <- function(param0, iter) {
   model_cv = xgb.cv(
     params = param0
     , nrounds = 8
-    , max.deph = 16
+    , max.deph = 50
     , nfold = 10
     , data = xgtrain
     , early.stop.round = 5
     , maximize = FALSE
-    , nthread = 16
+    , nthread = 32
   )
   gc()
   best <- min(model_cv$test.logloss.mean)
@@ -153,11 +153,11 @@ doTest <- function(param0, iter) {
   model = xgb.train(
     nrounds = 8
     , params = param0
-    , max.deph = 16
+    , max.deph = 50
     , data = xgtrain
     , watchlist = watchlist
     , print.every.n = 20
-    , nthread = 16
+    , nthread = 32
   )
   p <- predict(model, xgtest)
   rm(model)
@@ -173,7 +173,7 @@ param0 <- list(
   , "subsample" = 0.9
   , "colsample_bytree" = 0.9
   , "min_child_weight" = 1
-  , "max_depth" = 10
+  , "max_depth" = 50
 )
 
 #print(proc.time() - start_time)
@@ -207,7 +207,7 @@ cat("Making predictions\n")
 submission$PredictedProb <- ensemble/i
 
 # Prepare submission
-write.csv(submission, "bnp-xgb-ks3.csv", row.names=F, quote=F)
+write.csv(submission, "bnp-xgb-ks4.csv", row.names=F, quote=F)
 summary(submission$PredictedProb)
 
 # Stop the clock
